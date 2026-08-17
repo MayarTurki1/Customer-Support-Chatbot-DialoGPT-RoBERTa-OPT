@@ -164,7 +164,7 @@ The results indicated that RoBERTa was more suitable for classification and sent
 ## Repository Contents
 
 - `filtered_questions_answers.csv` — Customer support dataset
-- `Customer Support Chatbot Using DialoGPT, RoBERTa, and OPT(1).pdf` — Research paper documenting the project
+- `Customer Support Chatbot Using DialoGPT, RoBERTa, and OPT.pdf` — Research paper documenting the project
 
 ## Research Paper
 
