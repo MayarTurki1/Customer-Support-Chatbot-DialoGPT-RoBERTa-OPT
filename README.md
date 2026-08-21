@@ -1,171 +1,211 @@
-# Intelligent Customer Support Chatbot Using DialoGPT, RoBERTa, and OPT
+# Intelligent Customer Support Chatbot
 
-A customer support chatbot project that explores transformer-based models for query classification, sentiment analysis, and contextual response generation.
+An NLP-based customer support chatbot project exploring multiple approaches for understanding customer queries and retrieving appropriate responses.
 
-## Project Overview
+---
 
-This project focuses on developing an intelligent customer support chatbot capable of understanding customer queries and generating relevant responses.
+## Overview
 
-The system explores three pretrained transformer models, with each model serving a specific role:
+This project explores different Natural Language Processing approaches for building an intelligent customer support chatbot.
 
-- DialoGPT for conversational response generation
-- OPT-125M for lightweight and efficient text generation
-- RoBERTa for query classification and sentiment analysis
+The implementation includes several approaches for processing customer queries and generating or retrieving responses, including:
 
-The project aims to improve automated customer support by generating contextual responses while reducing the workload associated with repetitive customer queries.
+* Transformer-based text classification using **RoBERTa**
+* Text generation experiments using **GPT-2**
+* Semantic similarity search using **Sentence Transformers**
+* Efficient vector search using **FAISS**
 
-## Objectives
+The project explores how different NLP techniques can be combined to build more responsive and context-aware customer support systems.
 
-- Develop an intelligent customer support chatbot using transformer-based models.
-- Generate contextual and relevant responses to customer queries.
-- Classify customer queries into appropriate categories.
-- Analyze customer sentiment.
-- Compare the capabilities and limitations of different transformer models.
-- Evaluate chatbot responses using quantitative and qualitative metrics.
+---
 
 ## Dataset
 
-The dataset used in this project consists of 5,000 sampled records from a larger 27,000-record customer support dataset.
+The project uses customer support and conversational datasets containing pairs of questions/queries and corresponding responses.
 
-The dataset contains structured customer interactions, including:
+The main customer support dataset contains:
 
-- Customer ID
-- Query category
-- Customer query
-- Support response
-- Sentiment
-- Response time
-- Resolution status
+* `Customer_Query`
+* `Support_Response`
 
-The query and response pairs were used to support the development and evaluation of the chatbot system.
+Additional conversational data is loaded from `Conversation.csv` using:
 
-## Methodology
+* `question`
+* `answer`
 
-The project follows the following workflow:
+---
 
-**Data Preprocessing → Tokenization → Model Fine-Tuning → Response Generation / Classification → Evaluation**
+## Approach 1 — RoBERTa Classification
 
-### Data Preprocessing
+A pretrained **RoBERTa-base** model was fine-tuned for customer query classification.
 
-The preprocessing stage includes:
+### Process
 
-- Removing missing values
-- Text normalization
-- Lowercasing
-- Punctuation normalization
-- Removing redundant spaces
-- Tokenization
-- Padding sequences
-- Adding special tokens to distinguish between user queries and chatbot responses
+1. Load customer queries and support responses.
+2. Tokenize the input text using the RoBERTa tokenizer.
+3. Fine-tune RoBERTa for sequence classification.
+4. Predict the class corresponding to the appropriate response.
+5. Map the predicted class to a support response.
 
-The dataset was divided into:
+### Training Configuration
 
-- 80% Training
-- 20% Testing
+* Model: `roberta-base`
+* Epochs: `3`
+* Training batch size: `8`
+* Evaluation batch size: `8`
+* Weight decay: `0.01`
 
-## Models
+The trained model and tokenizer were saved for later inference.
 
-### DialoGPT
+---
 
-DialoGPT was used for conversational response generation.
+## Approach 2 — GPT-2 Text Generation
 
-It was selected for its ability to generate natural and contextually relevant responses while maintaining conversational context.
+The project also explores **GPT-2** for response generation.
 
-### OPT-125M
+The implementation experiments with different generation settings, including:
 
-OPT-125M was used as a lightweight text generation model.
+* Maximum new tokens
+* Temperature
+* Top-p sampling
+* Repetition penalty
+* Sampling-based generation
 
-It provides a balance between response generation quality and computational efficiency, making it suitable for scenarios where faster responses are important.
+This approach was explored as a generative alternative to predefined response retrieval.
 
-### RoBERTa
+---
 
-RoBERTa was used for query classification and sentiment analysis.
+## Approach 3 — Semantic Retrieval with Sentence Transformers
 
-The model was fine-tuned to classify customer queries and analyze sentiment to support more context-aware chatbot interactions.
+A semantic retrieval approach was implemented using:
 
-## Evaluation
+**Sentence Transformers + FAISS**
 
-Several evaluation metrics were used to assess the chatbot and classification performance:
+The `all-MiniLM-L6-v2` model was used to convert questions and responses into numerical embeddings.
 
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- BLEU
-- ROUGE-L
-- Perplexity (PPL)
-- Manual evaluation of response coherence, fluency, and contextual relevance
+These embeddings were indexed using **FAISS** to enable similarity-based retrieval.
 
-## Results
+### Query-to-Response Retrieval
 
-### DialoGPT
+The user's input is converted into an embedding and compared against the indexed questions.
 
-When the input sequence length was increased from 100 to 150 tokens, the reported accuracy increased from **30% to 62%**.
+The most similar question is retrieved, and its corresponding response is returned.
 
-For a sample of 50 queries, the reported results included:
+```text
+User Query
+    │
+    ▼
+Sentence Transformer
+    │
+    ▼
+Query Embedding
+    │
+    ▼
+FAISS Similarity Search
+    │
+    ▼
+Most Similar Question
+    │
+    ▼
+Corresponding Support Response
+```
 
-| Metric | Score |
-|---|---:|
-| Accuracy | 62% |
-| Precision | 100% |
-| Recall | 62% |
-| F1-score | 77% |
-| ROUGE-L | 0.39 |
+---
 
-The model generated more complete and contextual responses with the increased token length.
+## Conversational Retrieval
 
-### OPT-125M
+The project also explores a conversational interaction approach where:
 
-OPT-125M provided faster response generation and lower computational requirements.
+1. The chatbot presents a question.
+2. The user provides an answer.
+3. The user's response is converted into an embedding.
+4. FAISS retrieves the most semantically similar question.
+5. The chatbot continues the conversation using the retrieved question.
 
-However, the evaluation identified limitations in handling complex contextual queries. The reported results included:
+This approach explores semantic similarity for maintaining a conversational flow based on available dialogue data.
 
-| Metric | Score |
-|---|---:|
-| Recall | 62% |
-| F1-score | 77% |
-| ROUGE-L | 0.39 |
-
-The model sometimes produced repetitive or less detailed responses.
-
-### RoBERTa
-
-RoBERTa was primarily used for query classification and sentiment analysis.
-
-The reported evaluation showed:
-
-| Metric | Score |
-|---|---:|
-| Accuracy | 32.7% |
-| F1-score | 25% |
-
-The results indicated that RoBERTa was more suitable for classification and sentiment-related tasks than for open-ended response generation.
-
-## Key Findings
-
-- Increasing the token length from 100 to 150 improved the reported DialoGPT accuracy from 30% to 62%.
-- DialoGPT demonstrated stronger conversational performance and contextual response generation.
-- OPT-125M provided a faster and more lightweight alternative but showed weaker contextual understanding for complex queries.
-- RoBERTa was more suitable for query classification and sentiment analysis than free-form response generation.
-- Model selection should depend on the specific requirements of the chatbot, including accuracy, response quality, computational efficiency, and contextual understanding.
+---
 
 ## Technologies
 
-- Python
-- PyTorch
-- Hugging Face Transformers
-- NLTK
-- spaCy
-- Google Colab
-- DialoGPT
-- OPT-125M
-- RoBERTa
+### NLP & Machine Learning
 
-## Repository Contents
+* Python
+* Hugging Face Transformers
+* RoBERTa
+* GPT-2
+* Sentence Transformers
+* PyTorch
+* Scikit-learn
 
-- `filtered_questions_answers.csv` — Customer support dataset
-- `Customer Support Chatbot Using DialoGPT, RoBERTa, and OPT.pdf` — Research paper documenting the project
+### Semantic Search
 
-## Research Paper
+* FAISS
+* Vector Embeddings
+* Cosine Similarity
 
-[View the Research Paper](./Customer%20Support%20Chatbot%20Using%20DialoGPT%2C%20RoBERTa%2C%20and%20OPT.pdf)
+### Data Processing
+
+* Pandas
+* NumPy
+
+---
+
+## Project Workflow
+
+```text
+                    Customer / Conversation Data
+                              │
+                              ▼
+                       Text Processing
+                              │
+                ┌─────────────┼─────────────┐
+                ▼             ▼             ▼
+             RoBERTa        GPT-2      Sentence
+          Classification   Generation   Transformers
+                │             │             │
+                │             │             ▼
+                │             │          Embeddings
+                │             │             │
+                │             │             ▼
+                │             │            FAISS
+                │             │             │
+                └─────────────┴─────────────┘
+                              │
+                              ▼
+                    Customer Support Response
+```
+
+---
+
+## Key Features
+
+* Customer query classification using RoBERTa.
+* Exploratory response generation using GPT-2.
+* Semantic retrieval using Sentence Transformers.
+* Similarity search using FAISS.
+* Interactive command-line chatbot implementations.
+* Support for question-to-response and response-to-question retrieval.
+
+---
+
+## Project Contents
+
+The project notebook contains the complete implementation and experiments, including:
+
+* Data loading and validation
+* RoBERTa fine-tuning
+* Model evaluation
+* GPT-2 generation experiments
+* Sentence embedding generation
+* FAISS indexing
+* Semantic similarity retrieval
+* Interactive chatbot functions
+
+---
+
+## Key Takeaway
+
+This project explores multiple NLP strategies for customer support automation, comparing classification, generative, and semantic retrieval approaches.
+
+The implementation demonstrates how transformer models, text embeddings, and vector similarity search can be used to build different components of an intelligent customer support system.
